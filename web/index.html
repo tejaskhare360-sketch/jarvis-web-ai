@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S. // Stark Industries Holographic AI</title>
+  
+  <!-- Sci-Fi HUD Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/jarvis.css">
+</head>
+<body>
+  <div class="jarvis-container">
+    
+    <!-- TOP TELEMETRY BAR -->
+    <header class="top-bar">
+      <div class="brand-section">
+        <div class="stark-logo">
+          <div class="arc-mini-icon"></div>
+          <span class="brand-title">J.A.R.V.I.S.</span>
+        </div>
+        <span class="version-badge">MARK LXXXV // v4.2.0</span>
+      </div>
+
+      <div class="telemetry-row">
+        <div class="telemetry-item status-online">
+          <span>STATUS:</span>
+          <span class="val">ONLINE</span>
+        </div>
+        <div class="telemetry-item">
+          <span>POWER:</span>
+          <span class="val" id="batteryVal">99.8%</span>
+        </div>
+        <div class="telemetry-item">
+          <span>CORE TEMP:</span>
+          <span class="val" id="tempVal">38.4 °C</span>
+        </div>
+        <div class="telemetry-item">
+          <span>UPLINK:</span>
+          <span class="val" id="latencyVal">14 ms</span>
+        </div>
+        <div class="telemetry-item">
+          <span>TIME:</span>
+          <span class="val" id="telemetryClock">00:00:00</span>
+        </div>
+      </div>
+
+      <div class="top-controls">
+        <button id="sfxToggleBtn" class="hud-btn-icon active" title="Toggle Sound FX">
+          🔊 <span>AUDIO ON</span>
+        </button>
+        <button id="settingsBtn" class="hud-btn-icon" title="Configure API Key & Voice">
+          🔑 <span>SETTINGS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN STAGE -->
+    <main class="main-stage">
+      
+      <!-- LEFT: ARC REACTOR & SUIT TELEMETRY -->
+      <aside class="reactor-panel">
+        <div class="reactor-visualizer-container">
+          <canvas id="arcReactorCanvas"></canvas>
+        </div>
+
+        <div class="reactor-state-caption" id="reactorCaption">
+          <span class="pulse-dot"></span>ARC REACTOR // ONLINE
+        </div>
+
+        <!-- MARK 85 ARMOR TELEMETRY CARD -->
+        <div class="diagnostics-box">
+          <div class="diag-header">
+            <span>ARMOR STATUS // MK 85</span>
+            <span style="color:#00ff88;">OPTIMAL</span>
+          </div>
+          
+          <div class="diag-row">
+            <span>Nanotech Density</span>
+            <span class="val">99.8%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: 99.8%;"></div>
+          </div>
+
+          <div class="diag-row">
+            <span>Arc Reactor Core Output</span>
+            <span class="val">3.84 GJ/s</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: 100%; background: linear-gradient(90deg, #00f0ff, #fff);"></div>
+          </div>
+
+          <div class="diag-row">
+            <span>Repulsor Array Ready</span>
+            <span class="val">100%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: 100%;"></div>
+          </div>
+
+          <div class="diag-row">
+            <span>Flight Thruster Vectoring</span>
+            <span class="val">CALIBRATED</span>
+          </div>
+        </div>
+
+        <div class="voice-mode-banner">
+          <span>⚡ VOICE INTERFACE READY</span><br>
+          <span style="color:var(--text-muted);font-size:0.68rem;">Tap reactor or press microphone to speak</span>
+        </div>
+      </aside>
+
+      <!-- RIGHT: CHAT & COMMAND CONSOLE -->
+      <section class="chat-panel">
+        
+        <!-- PROTOCOL QUICK ACTION CHIPS -->
+        <div class="protocol-bar">
+          <span class="protocol-label">PROTOCOLS:</span>
+          <button class="protocol-chip" data-command="Run Diagnostics">
+            🛡️ Run Diagnostics
+          </button>
+          <button class="protocol-chip" data-command="House Party Protocol">
+            ⚡ House Party Protocol
+          </button>
+          <button class="protocol-chip" data-command="Satellite Scan">
+            🛰️ Satellite Scan
+          </button>
+          <button class="protocol-chip" data-command="Code Synthesis">
+            💻 Code Synthesis
+          </button>
+          <button class="protocol-chip" data-command="Tactical Analysis">
+            🎯 Tactical Analysis
+          </button>
+          <button class="protocol-chip" id="clearChatBtn" style="color:var(--hud-red);border-color:rgba(255,51,68,0.3);">
+            🧹 Clean Slate (Clear)
+          </button>
+        </div>
+
+        <!-- MESSAGES CONTAINER -->
+        <div class="messages-container" id="messagesContainer">
+          <!-- Dynamic conversation bubbles will be injected here -->
+        </div>
+
+        <!-- INPUT CONSOLE -->
+        <div class="input-console">
+          
+          <!-- LIVE SPEECH TRANSCRIPTION BANNER -->
+          <div class="live-speech-preview" id="speechPreview"></div>
+
+          <div class="input-row">
+            <button id="micBtn" class="voice-record-btn" title="Speak to J.A.R.V.I.S. (Web Speech API)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+
+            <div class="chat-input-wrapper">
+              <textarea id="chatInput" rows="1" placeholder="Issue command or speak to J.A.R.V.I.S., Sir..."></textarea>
+            </div>
+
+            <button id="sendBtn" class="send-btn" disabled title="Transmit Command">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="input-footer">
+            <div class="hud-shortcut-hint">
+              <span>Press <kbd>Enter</kbd> to transmit</span>
+              <span><kbd>Shift + Enter</kbd> for newline</span>
+              <span><kbd>Esc</kbd> to silence speech</span>
+            </div>
+            <span>STARK INDUSTRIES // PROPRIETARY FIRMWARE</span>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- SETTINGS MODAL (API KEY & VOICE CONFIGURATION) -->
+    <div class="modal-overlay" id="settingsModal">
+      <div class="hud-modal">
+        <div class="modal-header">
+          <span class="modal-title">⚙️ J.A.R.V.I.S. CONFIGURATION MATRIX</span>
+          <button class="modal-close-btn" id="closeModalBtn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          
+          <div class="form-group">
+            <label for="apiKeyInput">GOOGLE GEMINI API KEY</label>
+            <input type="password" id="apiKeyInput" class="form-control" placeholder="AIzaSy...">
+            <span class="form-hint">
+              Required for full cognitive generative AI. Obtain free from 
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--hud-cyan);text-decoration:none;">Google AI Studio ↗</a>.
+              Saved locally in your browser.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="voiceSelect">VOCAL SYNTHESIS VOICE (TTS)</label>
+            <select id="voiceSelect" class="form-control">
+              <option value="">Searching for British English voices...</option>
+            </select>
+            <span class="form-hint">Select a British voice (e.g. Daniel, Oliver, Google UK) for Paul Bettany's J.A.R.V.I.S. cadence.</span>
+          </div>
+
+          <div class="form-group">
+            <label>SPEECH SPEED (RATE)</label>
+            <div class="range-with-val">
+              <input type="range" id="rateRange" min="0.7" max="1.5" step="0.05" value="1.02">
+              <span class="range-val" id="rateVal">1.02x</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>VOCAL PITCH</label>
+            <div class="range-with-val">
+              <input type="range" id="pitchRange" min="0.7" max="1.3" step="0.05" value="0.95">
+              <span class="range-val" id="pitchVal">0.95</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>UI SOUND EFFECTS VOLUME</label>
+            <div class="range-with-val">
+              <input type="range" id="sfxVolumeRange" min="0.0" max="1.0" step="0.05" value="0.7">
+              <span class="range-val" id="sfxVolumeVal">70%</span>
+            </div>
+          </div>
+
+          <div style="margin-top:4px;">
+            <button type="button" id="testVoiceBtn" class="hud-btn-icon" style="width:100%;justify-content:center;">
+              🔊 Test Vocal Modulation
+            </button>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button id="saveSettingsBtn" class="btn-primary">SAVE PROTOCOLS</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- J.A.R.V.I.S. Core JavaScript Modules -->
+  <script src="js/audio-sfx.js"></script>
+  <script src="js/arc-reactor.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/protocols.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

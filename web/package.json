@@ -1,0 +1,23 @@
+{
+  "name": "jarvis-web-ai",
+  "version": "4.2.0",
+  "description": "J.A.R.V.I.S. (Tony Stark) AI Holographic HUD Chatbot Web App powered by Google Gemini & Web Speech API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve:py": "python3 server.py 3000"
+  },
+  "keywords": [
+    "jarvis",
+    "ironman",
+    "tony-stark",
+    "gemini",
+    "ai-chatbot",
+    "hud",
+    "web-speech",
+    "arc-reactor"
+  ],
+  "author": "Tony Stark / Antigravity",
+  "license": "MIT"
+}

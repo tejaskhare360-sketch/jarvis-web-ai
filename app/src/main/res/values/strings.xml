@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Gemini Chat</string>
+    <string name="gemini_api_key_placeholder">Paste your Gemini API key here</string>
+    <string name="input_hint">Ask Gemini anything…</string>
+    <string name="clear_chat">Clear conversation</string>
+    <string name="set_api_key">Gemini API Key</string>
+    <string name="get_api_key_info">Get a free API key at aistudio.google.com</string>
+</resources>
