@@ -42,9 +42,85 @@ const server = http.createServer((req, res) => {
 
   // Endpoint to pass server-side environment key to client if set
   if (pathname === '/api/config') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ hasEnvKey: !!envApiKey, apiKey: envApiKey }));
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify({
+      hasEnvKey: !!envApiKey,
+      isProxyActive: !!envApiKey,
+      apiKey: envApiKey
+    }));
     return;
+  }
+
+  // Server-side chat proxy matching Vercel serverless function
+  if (pathname === '/api/chat') {
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key'
+      });
+      res.end();
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let bodyData = '';
+      req.on('data', chunk => { bodyData += chunk; });
+      req.on('end', async () => {
+        try {
+          const body = JSON.parse(bodyData || '{}');
+          const key = envApiKey || req.headers['x-api-key'] || body.apiKey;
+          if (!key) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'GEMINI_API_KEY required' }));
+            return;
+          }
+
+          const model = body.model || 'gemini-2.5-flash';
+          const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`;
+
+          const upstream = await fetch(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: body.contents,
+              systemInstruction: body.systemInstruction,
+              generationConfig: body.generationConfig
+            })
+          });
+
+          if (!upstream.ok) {
+            const errText = await upstream.text();
+            res.writeHead(upstream.status, { 'Content-Type': 'application/json' });
+            res.end(errText);
+            return;
+          }
+
+          res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache, no-transform',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*'
+          });
+
+          const reader = upstream.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(decoder.decode(value, { stream: true }));
+          }
+          res.end();
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+      return;
+    }
   }
 
   if (pathname === '/') {

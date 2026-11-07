@@ -7,6 +7,7 @@
 class JarvisGeminiService {
   constructor() {
     this.apiKey = localStorage.getItem('gemini_api_key') || '';
+    this.isProxyActive = false;
     // Use gemini-2.5-flash as the fast, reliable browser endpoint
     this.modelName = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
     this.history = [];
@@ -31,6 +32,10 @@ You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), the legendary arti
       const res = await fetch('/api/config');
       if (res.ok) {
         const data = await res.json();
+        if (data && (data.isProxyActive || data.hasEnvKey)) {
+          this.isProxyActive = true;
+          console.log("J.A.R.V.I.S.: Secure serverless proxy active.");
+        }
         if (data && data.apiKey && !this.apiKey) {
           this.apiKey = data.apiKey;
           localStorage.setItem('gemini_api_key', this.apiKey);
@@ -106,8 +111,8 @@ You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), the legendary arti
       return;
     }
 
-    // 2. Check if API key is present
-    if (!this.apiKey) {
+    // 2. Check if API key or serverless proxy is present
+    if (!this.apiKey && !this.isProxyActive) {
       // Simulate intelligent offline guidance
       const fallback = `
 **My apologies, Sir, but my advanced neural networks are currently operating in localized diagnostic mode.**
@@ -143,6 +148,8 @@ In the meantime, you may test my voice commands, trigger the **House Party Proto
 
     const payload = {
       contents: contents,
+      model: this.modelName,
+      apiKey: this.apiKey || undefined,
       systemInstruction: {
         parts: [{ text: this.systemInstruction }]
       },
@@ -153,16 +160,19 @@ In the meantime, you may test my voice commands, trigger the **House Party Proto
       }
     };
 
-    // First, try calling local server proxy if running (e.g. node server.js), else direct Gemini API
-    const directApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
+    // Use serverless /api/chat if proxy active, or direct Gemini API endpoint
+    const fetchUrl = this.isProxyActive
+      ? '/api/chat'
+      : `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
 
     let accumulatedText = '';
 
     try {
-      const response = await fetch(directApiUrl, {
+      const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(this.apiKey ? { 'X-API-Key': this.apiKey } : {})
         },
         body: JSON.stringify(payload)
       });

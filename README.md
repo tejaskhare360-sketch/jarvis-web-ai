@@ -31,6 +31,11 @@ python3 server.py 3000
 ```
 Then navigate to **`http://localhost:3000`** in Google Chrome, Edge, Brave, or Safari!
 
+### ⚡ 1-Click Deploy to Vercel
+1. Import **`https://github.com/tejaskhare360-sketch/jarvis-web-ai`** into [Vercel](https://vercel.com/new).
+2. Set Environment Variable: `GEMINI_API_KEY` = your Google Gemini API key.
+3. Click **Deploy**! (All path rewrites to `web/` and serverless `/api/*` endpoints are pre-configured in `vercel.json`).
+
 ---
 
 ## 📱 Android AI Chatbot

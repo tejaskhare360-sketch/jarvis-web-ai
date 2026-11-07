@@ -1,0 +1,21 @@
+{
+  "name": "jarvis-web-ai",
+  "version": "4.2.0",
+  "description": "J.A.R.V.I.S. (Tony Stark) AI Holographic HUD Chatbot Web App",
+  "private": true,
+  "scripts": {
+    "start": "node web/server.js",
+    "dev": "node web/server.js",
+    "build": "echo 'Vercel build complete'"
+  },
+  "keywords": [
+    "jarvis",
+    "ironman",
+    "gemini",
+    "ai-chatbot",
+    "hud",
+    "vercel"
+  ],
+  "author": "Tony Stark / Tejas Khare",
+  "license": "MIT"
+}

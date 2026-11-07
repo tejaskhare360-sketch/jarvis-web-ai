@@ -78,6 +78,30 @@ Simply open `web/index.html` directly in Google Chrome, Microsoft Edge, Brave, o
 
 ---
 
+## ⚡ Deploying to Vercel
+
+The project is fully pre-configured for **Vercel** with automatic URL rewrites, static asset paths, and secure serverless API streaming functions.
+
+### Deploy in 3 Steps:
+1. Go to **[vercel.com/new](https://vercel.com/new)** and import your GitHub repository:
+   ```
+   https://github.com/tejaskhare360-sketch/jarvis-web-ai
+   ```
+2. **Root Directory**: Leave as `./` (or select `web`) — both configurations are pre-mapped!
+3. **Environment Variables**: Add your API key:
+   * **Name**: `GEMINI_API_KEY`
+   * **Value**: Your Google Gemini API Key from Google AI Studio
+4. Click **Deploy**.
+
+### Vercel Path Architecture:
+* `/` ➔ Maps directly to the holographic HUD (`web/index.html`)
+* `/css/*` ➔ Static HUD stylesheet (`web/css/*`)
+* `/js/*` ➔ Modular JavaScript engines (`web/js/*`)
+* `/api/config` ➔ Vercel Serverless Function detecting your environment key
+* `/api/chat` ➔ Vercel Serverless Function streaming Gemini AI tokens securely (no client-side API key exposure!)
+
+---
+
 ## ⌨️ Keyboard Shortcuts
 
 | Shortcut | Action |
