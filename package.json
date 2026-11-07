@@ -4,9 +4,8 @@
   "description": "J.A.R.V.I.S. (Tony Stark) AI Holographic HUD Chatbot Web App",
   "private": true,
   "scripts": {
-    "start": "node web/server.js",
     "dev": "node web/server.js",
-    "build": "echo 'Vercel build complete'"
+    "serve:py": "python3 web/server.py 3000"
   },
   "keywords": [
     "jarvis",

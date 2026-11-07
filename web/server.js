@@ -123,11 +123,17 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  if (pathname === '/') {
+  if (pathname === '/' || pathname === '/web' || pathname === '/web/') {
     pathname = '/index.html';
   }
 
-  const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+  let safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+  if (safePath.startsWith('/web/')) {
+    safePath = safePath.replace(/^\/web\//, '/');
+  } else if (safePath.startsWith('web/')) {
+    safePath = safePath.replace(/^web\//, '');
+  }
+
   const filePath = path.join(PUBLIC_DIR, safePath);
 
   fs.stat(filePath, (err, stats) => {
